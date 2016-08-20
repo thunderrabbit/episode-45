@@ -1,0 +1,19 @@
+---
+- name: install nginx
+  action: apt name=nginx state=installed
+
+- name: write our nginx.conf
+  action: template src=templates/nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: write our /etc/nginx/sites-available/default
+  action: template src=templates/default-site.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: raze existing website content
+  file: path=/usr/share/nginx/html/ state=absent
+
+- name: deploy website content
+  git: repo=https://github.com/jweissig/episode-47.git
+       dest=/usr/share/nginx/html/
+       version={{ app_version }}
